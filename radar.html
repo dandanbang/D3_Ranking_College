@@ -1,16 +1,55 @@
 <!DOCTYPE html>
 
-<meta charset="utf-8">
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
-<link rel="stylesheet" href="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.css">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+  <link rel="stylesheet" href="src/radar-chart.css">
+  <link rel="shortcut icon" href=http://www.freshdesignweb.com/wp-content/themes/fv28/images/icon.ico />
+  <link rel="stylesheet" type="text/css" href="style.css" media="all" />
+</head>
 
 <style>
-body {
-  padding: 20px;
+
+h1, p {
+  color: white;
+  font-family: 'Avenir Next',AvenirNextLTW01-Regular,Helvetica,Arial,sans-serif;
 }
-</style>
 
-<style>
+body {
+  padding: 2em;
+}
+
+.radar-chart .level {
+  stroke: white;
+  stroke-width: 0.5;
+}
+
+.radar-chart .axis line {
+  stroke: white;
+  stroke-width: 1;
+}
+
+.radar-chart .axis .legend {
+  font-family: 'Avenir Next',AvenirNextLTW01-Regular,Helvetica,Arial,sans-serif;
+  font-size: 12px;
+}
+
+.radar-chart .axis .legend.left {
+  fill: white;
+  text-anchor: end;
+  font-size: 13px;
+}
+.radar-chart .axis .legend.middle {
+  fill: white;
+  text-anchor: middle;
+  font-size: 13px;
+}
+.radar-chart .axis .legend.right {
+  fill: white;
+  text-anchor: start;
+  font-size: 13px;
+}
+
 .radar-chart .area {
   fill-opacity: 0.7;
 }
@@ -20,97 +59,174 @@ body {
 .radar-chart.focus .area.focused {
   fill-opacity: 0.9;
 }
-.area.germany, .germany .circle {
-  fill: #FFD700;
-  stroke: none;
+
+.background {
+  background-color: #252120;
 }
-.area.argentina, .argentina .circle {
-  fill: #ADD8E6;
-  stroke: none;
+.svg .chart-container {
+  display: inline-block;
+  float: left;
 }
+
+#buttons {
+  float: right;
+  width: 50%;
+}
+#buttonlist {
+  display: inline-block;
+  padding: 1px;
+}
+
+.radar-chart .tooltip {
+  font-family: 'Avenir Next',AvenirNextLTW01-Regular,Helvetica,Arial,sans-serif;
+  font-size: 15px;
+  transition: opacity 200ms;
+  opacity: 0;
+  color: white;
+}
+
+.svg {
+  padding: 0px 20px 20px 60px;
+}
+
+.tag:hover,.tabs-link:hover{
+  color:white;background:#20aae5;text-decoration:none;text-shadow:0 1px rgba(0,0,0,0.15);outline:none
+}
+.tag:active,.tabs-link:active{
+  padding-bottom:2px;border-top:1px solid white;-webkit-box-shadow:inset 0 -2px rgba(0,0,0,0.1),0 1px rgba(0,0,0,0.05);box-shadow:inset 0 -2px rgba(0,0,0,0.1),0 1px rgba(0,0,0,0.05)
+}
+
+#buttons>#buttonlist>.clicked {
+  background-color: #20aae5;
+}
+
+a, a:hover,a:focus{color:#59b329;text-decoration:none;outline:none}
+
+ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
+
+.tags-heading{height:2em;line-height:2em;margin-bottom:1em}
+
+.tags-heading>h4{margin:0;line-height:inherit}
+
+.tags-toggle{display:none;text-align:center;font-weight:bold}
+
+.tags-toggle:before{content:"\e010";margin-right:.5em}
+
+.tags-list{overflow:hidden;line-height:1.5em}
+
+.tags-list>li{float:left;margin:0 .8em .8em 0}
+
+.tag{display:block;padding-left:.6em;padding-right:.6em;line-height:inherit;font-size:.9375em;font-weight:normal;color:#778187;background:#f2f2f3}
+
 </style>
 
-<script src="http://d3js.org/d3.v3.js"></script>
-<script src="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.js"></script>
+<body class='background'>
+  <h1>Radar Chart</h1>
+  <p> Click on buttons to see comparison</p>
+  <div class='chart-container'></div>
+  </br></br>
+
+  <div id="buttons"></div>
+
+  <script type="text/javascript" src="src/radar-chart.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+  <script src="http://d3js.org/d3.v3.js"></script>
+  <script src="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.js"></script>
+</body>
 
 <script>
-RadarChart.defaultConfig.color = function() {};
-RadarChart.defaultConfig.radius = 3;
-RadarChart.defaultConfig.w = 400;
-RadarChart.defaultConfig.h = 400;
-</script>
+  RadarChart.defaultConfig.color = function(i) { c = colorArray; return c[i];}
+  RadarChart.defaultConfig.radius = 3;
+  RadarChart.defaultConfig.w = 450;
+  RadarChart.defaultConfig.h = 450;
+  RadarChart.defaultConfig.levels = 10;
 
-<span></span>
+  var colorArray = [];
+  var radar_data = [];
+  var dict = {};
+  var finalData = [];
+  var chart = RadarChart.chart();
+  var cfg = chart.config(); // retrieve default config
+  var svg = d3.select('body').append('svg').classed('svg', 1).attr('width', cfg.w + 50).attr('height', cfg.h + cfg.h / 4);
+  var colorIndex = 0;
 
-<script>
-var data = [
-  {
-    className: 'germany', // optional can be used for styling
-    axes: [
-      {axis: "strength", value: 13},
-      {axis: "intelligence", value: 6},
-      {axis: "charisma", value: 5},
-      {axis: "dexterity", value: 9},
-      {axis: "luck", value: 2}
-    ]
-  },
-  {
-    className: 'argentina',
-    axes: [
-      {axis: "strength", value: 6},
-      {axis: "intelligence", value: 7},
-      {axis: "charisma", value: 10},
-      {axis: "dexterity", value: 13},
-      {axis: "luck", value: 9}
-    ]
-  }
-];
-function randomDataset() {
-  return data.map(function(d) {
-    return {
-      className: d.className,
-      axes: d.axes.map(function(axis) {
-        return {axis: axis.axis, value: Math.ceil(Math.random() * 10)};
-      })
-    };
+  $(document).ready(function() {
+    $.ajax({
+      type: "GET",
+      url: "Radar_Country_Score.csv",
+      dataType: "text",
+      success: function(data) {extractData(data);}
+    });
   });
-}
+
+  $(document).ready(function() {
+    for (i=0; i<50; i++)
+      colorArray.push("#" + ((1 << 24) * Math.random() | 0).toString(16))
+  });
+
+
+  function extractData(csv) {
+    var lines = csv.split(/\r\n|\n|\r/); //spliting lines
+
+    for (var i=0; i<lines.length - 1; i++) {
+        var data = lines[i].split(","); //splitting lines into elements
+        displayData(String(data[0]));
+        dict[data[0]] = i; //storing key value pair of country name and index for searches
+        var _object = {};
+        _object.className = String(data[0]);
+        axes_list = []
+        axes_list.push({ axis: "teaching", value: parseFloat(data[1])});
+        axes_list.push({ axis: "total_score", value: parseFloat(data[2])});
+        axes_list.push({ axis: "research", value: parseFloat(data[3])});
+        axes_list.push({ axis: "citations", value: parseFloat(data[4])});
+        axes_list.push({ axis: "income", value: parseFloat(data[5])});
+        _object.axes = axes_list
+        radar_data.push(_object)
+    }
+  }
+
+  $("#buttons").on('click', '#button', function() {
+      $(this).css('background-color', colorArray[colorIndex]);
+      if (this.getAttribute("data-action") == "1") {
+        $(this).css('color', 'white');
+        addRadar(this.getAttribute("data-country"));
+        this.setAttribute("data-action", "2");
+        colorIndex++;
+      } else {
+        $(this).css('background-color', '#f2f2f3');
+        $(this).css('color', '#778187');
+        removeRadar(this.getAttribute("data-country"));
+        this.setAttribute('data-action', "1");
+        colorIndex--;
+      }
+  });
+
+  function addRadar(country) {
+    index = dict[country];
+    finalData.push(radar_data[index])
+    displayRadar();
+  }
+
+  function removeRadar(country) {
+    for (i=0; i< finalData.length; i++) {
+      if (finalData[i].className == country) {
+        finalData.splice(i, 1);
+      }
+      displayRadar();
+  }}
+
+  function displayRadar(){
+    if (finalData == 0) {
+      colorIndex--;
+    }
+    d3.selectAll("g").remove();
+    svg.append('g').datum(finalData).call(chart);
+  }
+
+  function displayData(data) {
+      var button = $('<li id="buttonlist"><a data-country="' + data + '" data-action="1" class="tag" id="button">' + data + '</a></li>');
+      button.appendTo('#buttons');
+  }
+
 </script>
-
-<script>
-var chart = RadarChart.chart();
-var cfg = chart.config(); // retrieve default config
-var svg = d3.select('body').append('svg')
-  .attr('width', cfg.w + cfg.w + 50)
-  .attr('height', cfg.h + cfg.h / 4);
-svg.append('g').classed('single', 1).datum(randomDataset()).call(chart);
-
-// many radars
-chart.config({w: cfg.w / 4, h: cfg.h / 4, axisText: false, levels: 0, circles: false});
-cfg = chart.config();
-function render() {
-  var game = svg.selectAll('g.game').data(
-    [
-      randomDataset(),
-      randomDataset(),
-      randomDataset(),
-      randomDataset()
-    ]
-  );
-  game.enter().append('g').classed('game', 1);
-  game
-    .attr('transform', function(d, i) { return 'translate('+((cfg.w * 4) + 50 + (i * cfg.w))+','+ (cfg.h * 1.3) +')'; })
-    .call(chart);
-
-  setTimeout(render, 1000);
-}
-render();
-</script>
-
-<!--
-<h2>Simple single chart drawing</h2>
-<div class="chart-container"></div>
-<script>
-RadarChart.draw(".chart-container", data);
-</script>
--->
