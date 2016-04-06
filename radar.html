@@ -13,11 +13,9 @@
 h1, p {
   color: white;
   font-family: 'Avenir Next',AvenirNextLTW01-Regular,Helvetica,Arial,sans-serif;
+  text-align: center;
 }
 
-body {
-  padding: 2em;
-}
 
 .radar-chart .level {
   stroke: white;
@@ -61,7 +59,7 @@ body {
 }
 
 .background {
-  background-color: #252120;
+  background-color: #1A1A1A;
 }
 .svg .chart-container {
   display: inline-block;
@@ -69,6 +67,7 @@ body {
 }
 
 #buttons {
+  padding-top: 100px;
   float: right;
   width: 50%;
 }
@@ -118,15 +117,20 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
 
 .tag{display:block;padding-left:.6em;padding-right:.6em;line-height:inherit;font-size:.9375em;font-weight:normal;color:#778187;background:#f2f2f3}
 
+#refresh {
+  width: 80px;
+}
+
 </style>
 
 <body class='background'>
   <h1>Radar Chart</h1>
-  <p> Click on buttons to see comparison</p>
+  <p> Click on buttons to add country onto the Radar Chart.</p> <p>Please remove countries in the same order to avoid color confusion.</p>
   <div class='chart-container'></div>
   </br></br>
 
-  <div id="buttons"></div>
+
+  <div id="buttons"><li id="refresh"><a data-country= data-action="1" class="tag" id="button">Refresh</a></li><br></div>
 
   <script type="text/javascript" src="src/radar-chart.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -136,7 +140,9 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
 </body>
 
 <script>
-  RadarChart.defaultConfig.color = function(i) { c = colorArray; return c[i];}
+  RadarChart.defaultConfig.color = function(i) { c = colorArray ; return c[i];}
+  //var colorScale = d3.scale.category20();
+  //RadarChart.defaultConfig.colors = colorScale;
   RadarChart.defaultConfig.radius = 3;
   RadarChart.defaultConfig.w = 450;
   RadarChart.defaultConfig.h = 450;
@@ -165,7 +171,6 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
       colorArray.push("#" + ((1 << 24) * Math.random() | 0).toString(16))
   });
 
-
   function extractData(csv) {
     var lines = csv.split(/\r\n|\n|\r/); //spliting lines
 
@@ -187,19 +192,26 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
   }
 
   $("#buttons").on('click', '#button', function() {
-      $(this).css('background-color', colorArray[colorIndex]);
       if (this.getAttribute("data-action") == "1") {
         $(this).css('color', 'white');
         addRadar(this.getAttribute("data-country"));
-        this.setAttribute("data-action", "2");
+        //colorArray.push(String($("polygon")[finalData.length - 1 ].getAttribute('style').substring(8, 25)));
+        $(this).css('background-color', colorArray[colorIndex]);
         colorIndex++;
+        this.setAttribute("data-action", "2");
       } else {
         $(this).css('background-color', '#f2f2f3');
         $(this).css('color', '#778187');
         removeRadar(this.getAttribute("data-country"));
+        colorArray.pop();
         this.setAttribute('data-action', "1");
         colorIndex--;
       }
+  });
+
+
+  $("#refresh").on('click', '#button', function() {
+    location.reload();
   });
 
   function addRadar(country) {
@@ -218,6 +230,7 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
 
   function displayRadar(){
     if (finalData == 0) {
+      colorArray.pop();
       colorIndex--;
     }
     d3.selectAll("g").remove();
