@@ -3,6 +3,9 @@ h1, p {
   color: white;
   font-family: 'Avenir Next',AvenirNextLTW01-Regular,Helvetica,Arial,sans-serif;
   text-align: center;
+  width: 960px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -47,7 +50,7 @@ h1, p {
   fill-opacity: 0.9;
 }
 
-.background {
+.backdrop {
   background-color: #1A1A1A;
 }
 .svg .chart-container {
