@@ -149,6 +149,7 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
   RadarChart.defaultConfig.levels = 10;
 
   var colorArray = [];
+  var colorDict = {};
   var radar_data = [];
   var dict = {};
   var finalData = [];
@@ -195,19 +196,28 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
       if (this.getAttribute("data-action") == "1") {
         $(this).css('color', 'white');
         addRadar(this.getAttribute("data-country"));
+        // colorDict[$(this).text()] = colorIndex;
         //colorArray.push(String($("polygon")[finalData.length - 1 ].getAttribute('style').substring(8, 25)));
+        // index = colorDict[$(this).text()]
         $(this).css('background-color', colorArray[colorIndex]);
         colorIndex++;
         this.setAttribute("data-action", "2");
       } else {
         $(this).css('background-color', '#f2f2f3');
         $(this).css('color', '#778187');
+
+        // $("a").each(function(){
+        //   alert($(this).children().css('background-color)');
+        //   $(this).children().css('background-color', colorArray[$(this).text()]);
+        // });
+
         removeRadar(this.getAttribute("data-country"));
-        colorArray.pop();
+        //colorArray.pop();
         this.setAttribute('data-action', "1");
         colorIndex--;
       }
   });
+
 
 
   $("#refresh").on('click', '#button', function() {
@@ -230,7 +240,7 @@ ul,ol,li{display:block;margin:0;padding:0}ol,ul{list-style:none}
 
   function displayRadar(){
     if (finalData == 0) {
-      colorArray.pop();
+      //colorArray.pop();
       colorIndex--;
     }
     d3.selectAll("g").remove();
